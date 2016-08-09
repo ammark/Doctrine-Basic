@@ -21,6 +21,7 @@ class GenusController extends Controller
         $genus->setName('Octupus '.rand(1, 100));
         $genus->setSubFamily('Octopodinae');
         $genus->setSpeciesCount(rand(100, 99999));
+        $genus->setIsPublished(rand(true, false));
 
         $em = $this->getDoctrine()->getManager();
         $em->persist($genus);
@@ -35,8 +36,11 @@ class GenusController extends Controller
     public function listAction()
     {
         $em = $this->getDoctrine()->getEntityManager();
+
+        dump($em->getRepository('AppBundle:Genus'));
+
         $genuses = $em->getRepository('AppBundle:Genus')
-            ->findAll();
+            ->findAllPublishedOrderedBySize();
 
         return $this->render('genus/list.html.twig', [
             'genuses' => $genuses,
@@ -62,6 +66,10 @@ class GenusController extends Controller
 //                ->transform($funFact);
 //            $cache->save($key, $funFact);
 //        }
+
+        if (!$genus) {
+            throw $this->createNotFoundException('No genus found');
+        }
 
         $this->get('logger')
             ->info('Showing genus: '.$genusName);
